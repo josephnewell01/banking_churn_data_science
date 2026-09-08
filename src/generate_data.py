@@ -30,7 +30,22 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 customer_ids = np.arange(100001, 100001 + NUMBER_OF_CUSTOMERS)
 
-age = rng.integers(18, 81, NUMBER_OF_CUSTOMERS)
+age = rng.normal(
+    loc=35,
+    scale=12,
+    size=NUMBER_OF_CUSTOMERS
+).round()
+
+while np.any((age < 18) | (age > 80)):
+    invalid = (age < 18) | (age > 80)
+
+    age[invalid] = rng.normal(
+        loc=35,
+        scale=12,
+        size=invalid.sum()
+    ).round()
+
+age = age.astype(int)
 
 income = np.clip(
     rng.normal(38_000, 15_000, NUMBER_OF_CUSTOMERS),
@@ -79,24 +94,63 @@ balance_change_pct = np.clip(
 # Create churn probability
 # -----------------------------
 
-# We deliberately create realistic relationships
-# between customer behaviour and churn.
+# Standardise behavioural variables so that their effects
+# are on comparable scales.
+
+app_z = (
+    monthly_app_logins - monthly_app_logins.mean()
+) / monthly_app_logins.std()
+
+transactions_z = (
+    monthly_transactions - monthly_transactions.mean()
+) / monthly_transactions.std()
+
+satisfaction_z = (
+    customer_satisfaction - customer_satisfaction.mean()
+) / customer_satisfaction.std()
+
+complaints_z = (
+    complaints - complaints.mean()
+) / complaints.std()
+
+tenure_z = (
+    tenure - tenure.mean()
+) / tenure.std()
+
+balance_change_z = (
+    balance_change_pct - balance_change_pct.mean()
+) / balance_change_pct.std()
+
+
+# Higher engagement and satisfaction reduce churn.
+# More complaints increase churn.
+# Shorter tenure increases churn.
+# Falling balances increase churn.
 
 churn_score = (
-    -0.8
-    - 0.08 * monthly_app_logins
-    - 0.04 * monthly_transactions
-    - 0.35 * customer_satisfaction
-    - 0.05 * tenure
-    + 0.45 * complaints
-    - 0.00002 * account_balance
-    - 0.01 * balance_change_pct
+    -1.7
+    - 0.65 * app_z
+    - 0.45 * transactions_z
+    - 0.75 * satisfaction_z
+    + 0.60 * complaints_z
+    - 0.30 * tenure_z
+    - 0.25 * balance_change_z
 )
+# Convert the score into a probability between 0 and 1.
 
 churn_probability = 1 / (1 + np.exp(-churn_score))
 
-churned = rng.binomial(1, churn_probability)
 
+# Randomly determine whether each customer churned.
+
+churned = rng.binomial(
+    1,
+    churn_probability
+)
+
+# -----------------------------
+# Create customers DataFrame
+# -----------------------------
 
 customers = pd.DataFrame({
     "customer_id": customer_ids,
@@ -112,7 +166,6 @@ customers = pd.DataFrame({
     "balance_change_pct": balance_change_pct,
     "churned": churned
 })
-
 
 # -----------------------------
 # Generate transactions
