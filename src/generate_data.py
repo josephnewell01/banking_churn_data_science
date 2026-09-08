@@ -97,6 +97,10 @@ balance_change_pct = np.clip(
 # Standardise behavioural variables so that their effects
 # are on comparable scales.
 
+age_z = (
+    age - age.mean()
+) / age.std()
+
 app_z = (
     monthly_app_logins - monthly_app_logins.mean()
 ) / monthly_app_logins.std()
@@ -129,6 +133,7 @@ balance_change_z = (
 
 churn_score = (
     -1.7
+    - 0.20 * age_z
     - 0.65 * app_z
     - 0.45 * transactions_z
     - 0.75 * satisfaction_z
