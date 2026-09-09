@@ -11,13 +11,14 @@ def create_features(df):
 
     # Proportion of total balance held in savings
     df["savings_ratio"] = (
-        df["savings_balance"] / df["total_balance"]
+        df["savings_balance"] 
+        / df["total_balance"].replace(0, pd.NA)
     )
 
     # Number of transactions per app login
     df["transactions_per_login"] = (
-    df["monthly_transactions"]
-    / df["monthly_app_logins"].replace(0, pd.NA)
+        df["monthly_transactions"]
+        / df["monthly_app_logins"].replace(0, pd.NA)
     )
 
     # Whether the customer has made at least one complaint
