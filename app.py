@@ -162,87 +162,75 @@ st.write(
 
 
 # --------------------------------------------------
+# Input field configuration
+# --------------------------------------------------
+# Each entry drives both the sidebar widget and the
+# current_inputs dict used for prediction.
+
+INPUT_FIELDS = [
+    {"key": "age", "label": "Age", "widget": "slider",
+     "min": 18, "max": 80, "value": 40},
+
+    {"key": "income", "label": "Annual income (£)", "widget": "number",
+     "min": 0, "max": 200000, "value": 40000},
+
+    {"key": "tenure_years", "label": "Tenure (years)", "widget": "slider",
+     "min": 0, "max": 50, "value": 5},
+
+    {"key": "account_balance", "label": "Account balance (£)", "widget": "number",
+     "min": 0.0, "max": 200000.0, "value": 10000.0},
+
+    {"key": "savings_balance", "label": "Savings balance (£)", "widget": "number",
+     "min": 0.0, "max": 200000.0, "value": 20000.0},
+
+    {"key": "monthly_app_logins", "label": "Monthly app logins", "widget": "slider",
+     "min": 0, "max": 50, "value": 8},
+
+    {"key": "monthly_transactions", "label": "Monthly transactions", "widget": "slider",
+     "min": 0, "max": 100, "value": 20},
+
+    {"key": "complaints", "label": "Number of complaints", "widget": "number",
+     "min": 0, "max": 10, "value": 0},
+
+    {"key": "customer_satisfaction", "label": "Customer satisfaction", "widget": "slider",
+     "min": 0.0, "max": 10.0, "value": 7.0, "step": 0.1},
+
+    {"key": "balance_change_pct", "label": "Balance change (%)", "widget": "slider",
+     "min": -100.0, "max": 100.0, "value": 0.0, "step": 0.1},
+]
+
+
+def render_input(field):
+    """Render one sidebar widget from its config and return the value."""
+    if field["widget"] == "slider":
+        return st.sidebar.slider(
+            field["label"],
+            field["min"],
+            field["max"],
+            field["value"],
+            step=field.get("step", 1),
+        )
+    elif field["widget"] == "number":
+        return st.sidebar.number_input(
+            field["label"],
+            min_value=field["min"],
+            max_value=field["max"],
+            value=field["value"],
+        )
+    else:
+        raise ValueError(f"Unknown widget type: {field['widget']}")
+
+
+# --------------------------------------------------
 # Sidebar
 # --------------------------------------------------
 
 st.sidebar.header("Customer scenario")
+st.sidebar.write("Adjust the inputs below to simulate a customer.")
 
-st.sidebar.write(
-    "Adjust the inputs below to simulate a customer."
-)
-
-
-age = st.sidebar.slider(
-    "Age",
-    18,
-    80,
-    40
-)
-
-income = st.sidebar.number_input(
-    "Annual income (£)",
-    min_value=0,
-    max_value=200000,
-    value=40000
-)
-
-tenure_years = st.sidebar.slider(
-    "Tenure (years)",
-    0,
-    50,
-    5
-)
-
-account_balance = st.sidebar.number_input(
-    "Account balance (£)",
-    min_value=0.0,
-    max_value=200000.0,
-    value=10000.0
-)
-
-savings_balance = st.sidebar.number_input(
-    "Savings balance (£)",
-    min_value=0.0,
-    max_value=200000.0,
-    value=20000.0
-)
-
-monthly_app_logins = st.sidebar.slider(
-    "Monthly app logins",
-    0,
-    50,
-    8
-)
-
-monthly_transactions = st.sidebar.slider(
-    "Monthly transactions",
-    0,
-    100,
-    20
-)
-
-complaints = st.sidebar.number_input(
-    "Number of complaints",
-    min_value=0,
-    max_value=10,
-    value=0
-)
-
-customer_satisfaction = st.sidebar.slider(
-    "Customer satisfaction",
-    0.0,
-    10.0,
-    7.0,
-    step=0.1
-)
-
-balance_change_pct = st.sidebar.slider(
-    "Balance change (%)",
-    -100.0,
-    100.0,
-    0.0,
-    step=0.1
-)
+current_inputs = {
+    field["key"]: render_input(field) for field in INPUT_FIELDS
+}
 
 
 # --------------------------------------------------
@@ -265,24 +253,6 @@ st.sidebar.caption(
     "A lower threshold flags more customers as potentially "
     "at risk, increasing recall but also false positives."
 )
-
-
-# --------------------------------------------------
-# Current customer inputs
-# --------------------------------------------------
-
-current_inputs = {
-    "age": age,
-    "income": income,
-    "tenure_years": tenure_years,
-    "account_balance": account_balance,
-    "savings_balance": savings_balance,
-    "monthly_app_logins": monthly_app_logins,
-    "monthly_transactions": monthly_transactions,
-    "complaints": complaints,
-    "customer_satisfaction": customer_satisfaction,
-    "balance_change_pct": balance_change_pct
-}
 
 
 # --------------------------------------------------
