@@ -1,64 +1,31 @@
 # Banking Customer Churn Prediction & Retention Simulator
 
-A machine-learning project that predicts customer churn and explores how changes in customer behaviour could affect predicted churn risk.
+A machine-learning project that predicts customer churn using synthetic banking data and explores how predictive models can support customer retention decisions.
 
-The project uses a synthetic banking dataset to investigate **which customers are most likely to leave, which characteristics are associated with churn, and how a predictive model could support customer retention decisions**.
+The project covers exploratory data analysis, feature engineering, machine-learning model comparison, probability thresholds, individual prediction explanations, and an interactive Streamlit application that allows users to simulate how changes in customer behaviour could affect predicted churn risk.
 
-The final output is an interactive **Streamlit retention simulator**, allowing users to enter customer characteristics, generate a churn probability, explore the factors contributing to the prediction, and test "what-if" scenarios.
-
-> **Important:** This project uses entirely synthetic data. The predictions and scenario analysis are for demonstration purposes and should not be interpreted as causal predictions or recommendations for real customers.
+> **Note:** The dataset used in this project is synthetic and was created specifically for demonstrating a data-science workflow. It does not contain real customer information.
 
 ---
 
 ## Project Overview
 
-Customer churn is an important business problem for banks and other subscription-based financial services.
+Customer churn is an important problem for banks and other subscription-based businesses. Being able to identify customers who may be at higher risk of leaving can allow organisations to investigate potential issues and consider appropriate retention strategies.
 
-Retaining an existing customer can be more valuable than acquiring a new one, but identifying customers who are genuinely at risk can be difficult.
+This project asks:
 
-This project explores whether customer behavioural and engagement data can be used to identify customers with an increased likelihood of churn.
+- Which customer characteristics are associated with churn?
+- Can customer churn be predicted using machine-learning models?
+- Which model performs best on the synthetic dataset?
+- How does changing the probability threshold affect precision and recall?
+- What factors are contributing to an individual customer's prediction?
+- How could a prediction model be incorporated into an interactive retention tool?
 
-The project asks:
-
-* Which customer characteristics are associated with churn?
-* Can customer churn be predicted using machine learning?
-* Which classification model performs best?
-* How does changing the prediction threshold affect the customers identified as being at risk?
-* What factors contribute to an individual customer's predicted churn risk?
-* How could a predictive model be used to explore potential retention scenarios?
-
----
-
-## Dataset
-
-The dataset is **synthetically generated** for this project rather than collected from real banking customers.
-
-It contains 20,000 customer records with variables including:
-
-| Feature                 | Description                          |
-| ----------------------- | ------------------------------------ |
-| `customer_id`           | Unique customer identifier           |
-| `age`                   | Customer age                         |
-| `income`                | Annual income                        |
-| `tenure_years`          | Length of time with the bank         |
-| `account_balance`       | Current account balance              |
-| `savings_balance`       | Savings account balance              |
-| `monthly_app_logins`    | Number of monthly banking app logins |
-| `monthly_transactions`  | Number of monthly transactions       |
-| `complaints`            | Number of customer complaints        |
-| `customer_satisfaction` | Customer satisfaction score          |
-| `balance_change_pct`    | Percentage change in account balance |
-| `churned`               | Whether the customer churned         |
-
-The synthetic churn outcome was generated using relationships between customer behaviour and engagement. In particular, lower engagement and satisfaction, more complaints, shorter tenure and falling balances were designed to be associated with greater churn risk.
-
-This provides a controlled dataset for demonstrating the modelling process without exposing real customer information.
+The final result is a **Customer Retention Simulator** built with Streamlit.
 
 ---
 
 ## Project Workflow
-
-The project follows a machine-learning workflow:
 
 ```text
 Synthetic Banking Data
@@ -67,318 +34,312 @@ Exploratory Data Analysis
         ↓
 Feature Engineering
         ↓
-Train / Test Split
+Train/Test Split
         ↓
 Machine Learning Models
         ↓
 Model Evaluation
         ↓
-Prediction & Explainability
+Threshold Analysis
         ↓
-Churn Threshold Analysis
+Individual Customer Predictions
         ↓
-Interactive Streamlit Simulator
+Interactive Retention Simulator
 ```
+
+This project focuses primarily on the modelling and application side of the data-science workflow. Because the dataset was generated specifically for the project, a separate data-cleaning or SQL pipeline was not required.
+
+---
+
+## Dataset
+
+The dataset contains 20,000 synthetic banking customers.
+
+| Feature | Description |
+|---|---|
+| `customer_id` | Unique customer identifier |
+| `age` | Customer age |
+| `income` | Annual customer income |
+| `tenure_years` | Number of years the customer has been with the bank |
+| `account_balance` | Current account balance |
+| `savings_balance` | Savings account balance |
+| `monthly_app_logins` | Number of monthly banking app logins |
+| `monthly_transactions` | Number of monthly transactions |
+| `complaints` | Number of recorded complaints |
+| `customer_satisfaction` | Customer satisfaction score |
+| `balance_change_pct` | Percentage change in customer balance |
+| `churned` | Target variable indicating whether the customer churned |
+
+The churn outcome was generated using relationships between customer engagement, satisfaction, complaints, tenure and changes in account balances.
+
+Because the data is synthetic, the results should be interpreted as demonstrating a modelling workflow rather than as evidence about real banking customers.
 
 ---
 
 ## Exploratory Data Analysis
 
-Initial analysis was used to investigate relationships between customer characteristics and churn.
+Exploratory analysis was used to understand the structure of the dataset and investigate relationships between customer characteristics and churn.
 
-Examples include examining differences between customers who stayed and customers who churned across:
+Areas explored included:
 
-* App engagement
-* Transaction activity
-* Customer satisfaction
-* Complaints
-* Age
-* Tenure
-* Account balances
-* Changes in account balance
+- Customer age
+- Income
+- Account balances
+- Customer tenure
+- App engagement
+- Transaction activity
+- Complaints
+- Customer satisfaction
+- Balance changes
+- Differences between customers who stayed and customers who churned
 
-The analysis suggested meaningful differences in several behavioural variables.
+The analysis helped identify behavioural patterns that could be incorporated into the predictive models.
 
-For example, customers who churned tended to have:
+For example, customers who churned tended to show:
 
-* Lower monthly app engagement
-* Lower customer satisfaction
-* More complaints
-* Shorter tenure
-* More negative changes in account balance
-
-These observations informed the subsequent feature engineering and modelling.
+- Lower app engagement
+- Lower customer satisfaction
+- More complaints
+- Shorter tenure
+- More negative changes in balances
 
 ---
 
 ## Feature Engineering
 
-Additional features were created to provide the models with more useful representations of customer behaviour.
+Additional features were created to give the models more useful representations of customer behaviour and financial activity.
 
-Examples include measures designed to capture:
+The engineered features include:
 
-* Customer engagement
-* Relative financial behaviour
-* Interaction between behavioural variables
-* Low engagement indicators
+### Total Balance
 
-The feature-engineering process also included handling edge cases such as zero balances when calculating ratio-based features.
+Combines current account and savings balances:
+
+```text
+total_balance = account_balance + savings_balance
+```
+
+### Savings Ratio
+
+Measures the proportion of a customer's total balance held in savings.
+
+### Transactions per Login
+
+Measures transaction activity relative to app engagement:
+
+```text
+transactions_per_login =
+    monthly_transactions / monthly_app_logins
+```
+
+### Complaint Indicator
+
+Creates a binary variable indicating whether a customer has made at least one complaint.
+
+### Low Engagement Indicator
+
+Identifies customers with particularly low levels of digital engagement.
+
+### Declining Balance Indicator
+
+Identifies customers whose balances have decreased.
+
+These features were then used alongside the original variables when training the models.
 
 ---
 
-## Machine Learning Models
+## Machine Learning
 
-Three classification models were developed and compared:
+Three classification models were trained and compared:
 
-### 1. Logistic Regression
+1. Logistic Regression
+2. Decision Tree
+3. Random Forest
 
-Used as an interpretable baseline model.
+The dataset was split into:
 
-### 2. Decision Tree
+- **16,000 training observations**
+- **4,000 test observations**
 
-Used to investigate a non-linear tree-based approach.
-
-### 3. Random Forest
-
-Used as an ensemble model capable of capturing more complex relationships between features.
-
-The models were evaluated using a held-out test set rather than relying solely on training performance.
+The models were evaluated on the unseen test dataset.
 
 ---
 
 ## Model Evaluation
 
-The test dataset contained 4,000 customers, including 853 customers who churned and 3,147 who did not.
+Several metrics were used rather than relying solely on accuracy.
 
-The results were:
+This is important for churn prediction because the cost of incorrectly classifying a customer as unlikely to churn may be different from incorrectly flagging a customer as at risk.
 
-| Model               | Accuracy | Precision | Recall |   ROC-AUC |
-| ------------------- | -------: | --------: | -----: | --------: |
-| Logistic Regression |    0.813 |     0.635 |  0.290 | **0.802** |
-| Decision Tree       |    0.802 |     0.546 |  0.272 |     0.756 |
-| Random Forest       |    0.810 |     0.637 |  0.251 |     0.776 |
+### Results
 
-### Key finding
+| Model | Accuracy | Precision | Recall | ROC-AUC |
+|---|---:|---:|---:|---:|
+| Logistic Regression | 0.813 | 0.635 | 0.290 | 0.802 |
+| Decision Tree | 0.802 | 0.546 | 0.272 | 0.756 |
+| Random Forest | 0.810 | 0.637 | 0.251 | 0.776 |
 
-Logistic Regression achieved the highest ROC-AUC of the three models at approximately **0.802**.
+Logistic Regression achieved the highest ROC-AUC and accuracy of the three models, while Random Forest produced a very similar precision.
 
-This was particularly interesting because the more complex Random Forest model did not outperform the simpler Logistic Regression model on this dataset.
-
-This demonstrates an important modelling principle:
-
-> A more complex model is not necessarily a better model.
-
-Model selection should consider the business objective, interpretability and appropriate evaluation metrics rather than simply choosing the most sophisticated algorithm.
+For this project, Logistic Regression was used for the individual prediction and interactive simulation components.
 
 ---
 
 ## Why Accuracy Isn't Enough
 
-Because the project is focused on identifying customers who may churn, simply maximising accuracy isn't necessarily the best objective.
+The default classification threshold for a binary classifier is commonly 0.5.
 
-A false negative occurs when the model predicts that a customer will stay when they actually churn.
+However, the choice of threshold can have a significant effect on the balance between precision and recall.
 
-If the purpose of the model is to help identify customers for potential retention activity, failing to identify a customer at risk could be more costly than contacting some customers who ultimately remain.
-
-For this reason, the project explores the relationship between **precision and recall at different probability thresholds**.
-
-For the Logistic Regression model:
+For example, using the Logistic Regression model:
 
 | Threshold | Precision | Recall | Customers Flagged |
-| --------: | --------: | -----: | ----------------: |
-|       0.1 |     0.316 |  0.924 |             2,493 |
-|       0.2 |     0.404 |  0.740 |             1,560 |
-|       0.3 |     0.482 |  0.574 |             1,017 |
-|       0.4 |     0.568 |  0.423 |               636 |
-|       0.5 |     0.635 |  0.290 |               389 |
-|       0.6 |     0.711 |  0.199 |               239 |
-|       0.7 |     0.822 |  0.124 |               129 |
+|---:|---:|---:|---:|
+| 0.1 | 0.316 | 0.924 | 2,493 |
+| 0.2 | 0.404 | 0.740 | 1,560 |
+| 0.3 | 0.482 | 0.574 | 1,017 |
+| 0.4 | 0.568 | 0.423 | 636 |
+| 0.5 | 0.635 | 0.290 | 389 |
+| 0.6 | 0.711 | 0.199 | 239 |
+| 0.7 | 0.822 | 0.124 | 129 |
 
-This demonstrates the trade-off involved in choosing a classification threshold.
+This demonstrates the trade-off between identifying more potentially at-risk customers and reducing the number of customers incorrectly flagged.
 
-A lower threshold identifies more potential churners and produces higher recall, but also results in more false positives.
+For example:
 
-A higher threshold produces fewer flagged customers and higher precision, but risks missing more genuine churners.
+- A **lower threshold** identifies more potential churners, increasing recall.
+- A **higher threshold** produces fewer alerts, but risks missing more customers who eventually churn.
+
+The appropriate threshold would therefore depend on the business objective and the relative costs of false positives and false negatives.
+
+The Streamlit application allows this threshold to be adjusted interactively.
 
 ---
 
 ## Individual Customer Predictions
 
-The project goes beyond evaluating the overall model by allowing predictions to be made for individual customers.
+The application can generate a churn probability for an individual customer based on their characteristics.
 
-For an individual customer, the application produces a **predicted probability of churn** and provides an explanation of the characteristics contributing to the prediction.
+Rather than displaying only a probability, the application also provides an explanation of the prediction.
 
-For example, a customer with:
+For the Logistic Regression model, feature contributions are calculated using the customer's standardised feature values and the model's learned coefficients.
 
-* Low app engagement
-* Low transaction activity
-* Multiple complaints
-* Low satisfaction
-* Falling account balances
-* Shorter tenure
+These contributions are visualised to show which features are pushing the prediction towards or away from churn.
 
-may receive a substantially higher predicted churn probability than a highly engaged and satisfied customer.
-
-This makes the model easier to interpret from a business perspective rather than treating it simply as a classification algorithm.
+This provides a more interpretable view of the model's output than simply displaying a single probability.
 
 ---
 
-# Interactive Retention Simulator
+## Interactive Retention Simulator
 
-The final stage of the project is an interactive **Streamlit application**.
+The project includes a Streamlit application that allows users to interact with the trained model.
 
-The simulator allows users to enter or adjust customer characteristics and immediately see the resulting predicted churn probability.
+The application allows a user to enter customer characteristics such as:
 
-The application can be used to explore questions such as:
+- Age
+- Income
+- Tenure
+- Account balance
+- Savings balance
+- App logins
+- Monthly transactions
+- Complaints
+- Customer satisfaction
+- Balance change
 
-> "What happens to the model's predicted risk if this customer's engagement increases?"
+The application then:
 
-or:
+1. Applies the same feature engineering used by the model.
+2. Generates a predicted probability of churn.
+3. Classifies the customer according to the selected probability threshold.
+4. Visualises the prediction.
+5. Shows the factors contributing to the prediction.
+6. Provides example retention considerations based on the customer's characteristics.
 
-> "How does the predicted risk change if the customer has fewer complaints?"
+### What-if Analysis
 
-This creates a simple **what-if scenario analysis tool** rather than just displaying a static model prediction.
+The simulator can also be used to explore hypothetical scenarios.
 
-### Example workflow
+For example, a user could increase a customer's app engagement or satisfaction score and observe how the model's predicted churn probability changes.
 
-```text
-Enter customer characteristics
-            ↓
-Create model features
-            ↓
-Generate churn probability
-            ↓
-Display customer risk
-            ↓
-Explore alternative scenarios
-            ↓
-Compare predicted risk
-```
+This makes the model more interactive and demonstrates how predictive modelling could be incorporated into a decision-support tool.
 
-### Important limitation
+> These scenarios demonstrate model behaviour and should not be interpreted as proof that changing a particular customer characteristic would directly cause their churn probability to change.
 
-The simulator demonstrates **modelled scenarios, not causal relationships**.
+---
 
-For example:
+## Retention Recommendations
 
-> "Increasing app engagement reduces the model's predicted churn probability"
+The application provides illustrative retention considerations based on customer characteristics.
 
-does **not** mean:
+These include:
 
-> "Increasing app engagement will definitely cause this customer not to churn."
+- Reviewing service issues where complaints are present
+- Following up with customers showing low satisfaction
+- Encouraging useful digital engagement where app activity is low
+- Reviewing customer needs where transaction activity is low
+- Investigating declining balances
+- Providing additional engagement during the early customer relationship
 
-The model is trained on synthetic observational relationships, so the scenario analysis should be interpreted as an exploration of model behaviour rather than evidence that a particular intervention will cause a particular outcome.
+These recommendations are deliberately presented as **suggestions rather than automated decisions**.
+
+In a real banking environment, retention actions would require additional customer information, business rules, human judgement and appropriate governance.
 
 ---
 
 ## Technology Stack
 
-### Programming & Data
+### Python
 
-* Python
-* pandas
-* NumPy
-* Matplotlib
-
-### Machine Learning
-
-* scikit-learn
-* Logistic Regression
-* Decision Trees
-* Random Forest
+- Pandas
+- NumPy
+- Matplotlib
+- Seaborn
+- SciPy
+- Scikit-learn
 
 ### Application
 
-* Streamlit
+- Streamlit
 
 ### Development
 
-* VS Code
-* Git
-* GitHub
-
----
-
-## Responsible Use & Limitations
-
-This project is intended as a **portfolio demonstration of data science and machine-learning techniques**.
-
-There are several important limitations:
-
-### Synthetic data
-
-The dataset is entirely synthetic and does not represent real banking customers.
-
-Consequently, the model's performance should not be interpreted as evidence that the same approach would achieve similar results on real banking data.
-
-### Correlation vs causation
-
-The model identifies patterns associated with churn. It does not establish that changing a particular customer characteristic will cause churn to increase or decrease.
-
-### Model performance
-
-The models achieve useful predictive performance on the synthetic test data, but there is still substantial uncertainty in individual predictions.
-
-### Responsible decision-making
-
-A real-world churn model should not automatically determine how customers are treated.
-
-Predictions should instead be considered alongside appropriate human judgement, business context, fairness considerations and regulatory requirements.
-
----
-
-## What I Learned
-
-This project provided practical experience across the machine-learning workflow, including:
-
-* Generating and working with synthetic data
-* Exploratory data analysis
-* Feature engineering
-* Training classification models
-* Comparing different modelling approaches
-* Evaluating classification performance
-* Understanding precision, recall and ROC-AUC
-* Investigating probability thresholds
-* Producing individual customer predictions
-* Building interactive data-science applications with Streamlit
-* Thinking about model outputs in a business context
-* Considering the difference between prediction and causation
-* Using Git and GitHub to manage and present a data-science project
-
-One of the main lessons from the project was that **model performance needs to be considered in context**. A model with strong accuracy is not automatically the most useful model, particularly when the cost of false positives and false negatives differs.
+- Visual Studio Code
+- Git
+- GitHub
 
 ---
 
 ## Running the Project
 
-Clone the repository:
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/josephnewell01/banking_churn_data_science.git
-```
-
-Move into the project directory:
-
-```bash
 cd banking_churn_data_science
 ```
 
-Create and activate a virtual environment:
+### 2. Create a virtual environment
 
-### Windows
+On Windows:
 
 ```powershell
 python -m venv .venv
+```
+
+Activate it with:
+
+```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-Install the required packages:
+### 3. Install the dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run the Streamlit application:
+### 4. Run the Streamlit application
 
 ```bash
 streamlit run app.py
@@ -388,31 +349,115 @@ The application should then open in your browser.
 
 ---
 
+## Responsible Use & Limitations
+
+This project is intended as a demonstration of a data-science workflow.
+
+There are several important limitations.
+
+### Synthetic Data
+
+The dataset is entirely synthetic and does not represent real banking customers.
+
+The relationships between variables and churn were deliberately created for the purposes of the project. Consequently, the model's performance should not be interpreted as representative of a real banking environment.
+
+### Correlation Does Not Imply Causation
+
+The model identifies patterns associated with churn. It does not demonstrate that changing a particular characteristic would cause a customer to stay.
+
+For example, if higher engagement is associated with lower churn in the synthetic data, this does not establish that simply increasing app logins would prevent churn.
+
+### Predictions Should Support Rather Than Replace Decisions
+
+In a real-world setting, a churn model should be used as one source of information rather than an automatic decision-making system.
+
+Additional considerations would include:
+
+- Data quality
+- Model validation
+- Fairness and bias
+- Privacy and data protection
+- Model monitoring
+- Human oversight
+- Business costs and benefits
+
+---
+
+## What I Learned
+
+This project helped develop practical experience across several areas of the data-science workflow.
+
+### Data Analysis
+
+- Exploring relationships between variables
+- Comparing groups
+- Visualising distributions and patterns
+- Interpreting statistical differences
+
+### Feature Engineering
+
+- Creating useful derived variables
+- Handling division-by-zero situations
+- Converting behavioural information into model features
+- Understanding how feature design affects predictive modelling
+
+### Machine Learning
+
+- Training classification models
+- Comparing different algorithms
+- Evaluating models using multiple metrics
+- Understanding precision, recall and ROC-AUC
+- Working with probability thresholds
+
+### Model Interpretation
+
+- Understanding Logistic Regression coefficients
+- Calculating individual feature contributions
+- Communicating why a model produces a particular prediction
+
+### Application Development
+
+- Connecting a trained model to a Streamlit interface
+- Creating interactive inputs
+- Building what-if scenarios
+- Presenting model outputs visually
+- Turning a predictive model into a practical decision-support tool
+
+### Software Development
+
+- Structuring a Python project
+- Separating functionality into modules
+- Managing dependencies
+- Using Git and GitHub for version control
+
+---
+
 ## AI-Assisted Development
 
-AI coding tools were used during development to assist with areas such as code generation, debugging, explanation, and refinement.
+AI tools were used as part of the development process, particularly for coding support, debugging and exploring implementation approaches.
 
-Generated code was reviewed, tested and adapted during development rather than being used without verification.
+The project was developed iteratively, with generated suggestions being tested, adapted and integrated into the codebase.
 
-This project was built as a learning exercise, with particular emphasis on understanding the underlying Python, machine-learning and statistical concepts rather than simply producing working code.
+This reflects the increasing role of tools such as GitHub Copilot and Claude in modern software and data-science workflows, while retaining human responsibility for understanding, testing and evaluating the resulting code and models.
 
 ---
 
 ## Future Improvements
 
-Potential future development could include:
+Possible future extensions include:
 
-* More extensive model explainability using SHAP
-* Hyperparameter tuning
-* Cross-validation
-* More sophisticated customer segmentation
-* Model monitoring and drift detection
-* Automated testing
-* CI/CD using GitHub Actions
-* Deployment of the Streamlit application
-* Testing the approach on a larger or more realistic dataset
+- Hyperparameter tuning
+- More advanced model comparison
+- SHAP-based model explanations
+- Cross-validation
+- Model monitoring
+- Automated testing
+- CI/CD
+- Additional customer segmentation
+- Deployment of the Streamlit application
+- Evaluation using a real-world banking dataset
 
-These are deliberately left as potential extensions rather than being presented as features already implemented.
+These features were not required for the current version of the project but would provide opportunities to extend the project further.
 
 ---
 
@@ -422,4 +467,4 @@ These are deliberately left as potential extensions rather than being presented 
 
 First-Class Master's degree in Mathematics, Durham University.
 
-This project was developed as part of my portfolio to demonstrate practical skills in **Python, data analysis, statistics, machine learning and data-driven problem solving**.
+This project was developed as part of my portfolio to demonstrate practical skills in Python, data analysis, machine learning, model interpretation and interactive data applications.
